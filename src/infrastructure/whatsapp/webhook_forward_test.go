@@ -293,6 +293,21 @@ func TestExtractStructuredMessageContentWithContactsArrayPayload(t *testing.T) {
 	}
 }
 
+func TestExtractStructuredMessageContentWithPollPayload(t *testing.T) {
+	payload := map[string]any{
+		"poll": &webhookPollPayload{
+			Type: "creation",
+			Name: "Lunch?",
+		},
+	}
+
+	got := extractStructuredMessageContent(payload)
+	want := "Poll: Lunch?"
+	if got != want {
+		t.Fatalf("extractStructuredMessageContent() = %q, want %q", got, want)
+	}
+}
+
 // TestAddWebhookSessionID pins the issue #578 enrichment: webhook payloads gain a
 // session_id derived from their device_id (JID) so multi-tenant consumers can map
 // an event back to the session they registered, while device_id stays the JID.
