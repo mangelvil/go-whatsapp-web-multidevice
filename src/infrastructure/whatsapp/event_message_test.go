@@ -115,6 +115,7 @@ func TestBuildEventPayloadReactionWithoutKeyDoesNotPanic(t *testing.T) {
 	}
 }
 
+// TestBuildEventPayloadPollCreation verifies poll creation messages populate body and poll webhook fields.
 func TestBuildEventPayloadPollCreation(t *testing.T) {
 	selectableCount := uint32(1)
 	evt := &events.Message{
@@ -168,6 +169,7 @@ func TestBuildEventPayloadPollCreation(t *testing.T) {
 	}
 }
 
+// TestBuildEventPayloadPollVote verifies poll vote messages include encrypted vote metadata without a client.
 func TestBuildEventPayloadPollVote(t *testing.T) {
 	evt := &events.Message{
 		Info: types.MessageInfo{

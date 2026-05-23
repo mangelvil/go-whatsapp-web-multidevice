@@ -610,6 +610,7 @@ func structuredContactsArraySummary(contacts []webhookContactPayload) string {
 	return utils.FormatContactSummary(first.DisplayName, first.PhoneNumber, true)
 }
 
+// structuredPollSummary builds the Chatwoot fallback text for any supported poll payload shape.
 func structuredPollSummary(poll any) string {
 	switch p := poll.(type) {
 	case *webhookPollPayload:
@@ -650,6 +651,7 @@ func structuredPollSummary(poll any) string {
 	}
 }
 
+// structuredPollPayloadSummary builds a short Chatwoot text summary from a normalized poll payload.
 func structuredPollPayloadSummary(poll webhookPollPayload) string {
 	switch poll.Type {
 	case "vote":
