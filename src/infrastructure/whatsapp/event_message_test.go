@@ -207,6 +207,22 @@ func TestBuildEventPayloadPollCreation(t *testing.T) {
 	if len(poll.Options) != 2 || poll.Options[0].Name != "Pizza" || poll.Options[1].Hash != "hash-sushi" {
 		t.Fatalf("unexpected poll options: %+v", poll.Options)
 	}
+
+	prepared := &webhookPollPayload{
+		Type: "creation", PollID: "POLL1", Question: "Lunch?",
+		SelectableOptionCount: 1,
+		Options:               []webhookPollOptionPayload{{Name: "Pizza", Hash: pollOptionHash("Pizza")}},
+	}
+	_, merged, err := buildEventPayload(context.Background(), nil, evt, prepared)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if merged["poll"] != prepared || prepared.Name != "Lunch?" || prepared.Question != "Lunch?" || prepared.PollID != "POLL1" {
+		t.Fatalf("expected both original and local poll fields: %+v", merged["poll"])
+	}
+	if prepared.Options[0].Hash != pollOptionHash("Pizza") {
+		t.Fatal("local compatibility fields must not replace upstream option hashes")
+	}
 }
 
 // TestBuildEventPayloadPollVote verifies poll vote messages include encrypted vote metadata without a client.

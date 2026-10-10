@@ -120,6 +120,10 @@ func TestProcessConversationMessagesPersistsPollDefinitionWithoutText(t *testing
 	assert.True(t, repo.definition.UpdatedAt.Equal(wantTimestamp),
 		"poll definition updated_at = %s, want history timestamp %s",
 		repo.definition.UpdatedAt, wantTimestamp)
+	if assert.Len(t, repo.lastBatch, 1) {
+		assert.Equal(t, "Poll: History poll", repo.lastBatch[0].Content)
+		assert.Equal(t, deviceID, repo.lastBatch[0].DeviceID)
+	}
 }
 
 // TestProcessHistorySyncRoutesOnDemandToConversationMessages pins the
@@ -324,7 +328,7 @@ type historyReactionRepoSpy struct {
 }
 
 type historyPollRepoSpy struct {
-	domainChatStorage.IChatStorageRepository
+	historyMessageBatchRepoSpy
 	definition *domainChatStorage.PollDefinition
 }
 
