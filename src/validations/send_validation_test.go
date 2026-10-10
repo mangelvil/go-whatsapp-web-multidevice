@@ -899,6 +899,85 @@ func TestValidateSendPollRejectsMaxAnswerOutsideUint32(t *testing.T) {
 	assert.Equal(t, pkgError.ValidationError("max_answer: must be no greater than 4294967295."), err)
 }
 
+func TestValidateSendPollVote(t *testing.T) {
+	type args struct {
+		request domainSend.PollVoteRequest
+	}
+	tests := []struct {
+		name string
+		args args
+		err  any
+	}{
+		{
+			name: "should success with normal condition",
+			args: args{request: domainSend.PollVoteRequest{
+				BaseRequest: domainSend.BaseRequest{
+					Phone: "120363210094537452@g.us",
+				},
+				MessageID:   "3EB089B9D6ADD58153C561",
+				PollSender:  "34600111222@s.whatsapp.net",
+				OptionNames: []string{"Si"},
+			}},
+			err: nil,
+		},
+		{
+			name: "should error with empty phone",
+			args: args{request: domainSend.PollVoteRequest{
+				BaseRequest: domainSend.BaseRequest{
+					Phone: "",
+				},
+				MessageID:   "3EB089B9D6ADD58153C561",
+				PollSender:  "34600111222@s.whatsapp.net",
+				OptionNames: []string{"Si"},
+			}},
+			err: pkgError.ValidationError("phone: cannot be blank."),
+		},
+		{
+			name: "should error with empty message id",
+			args: args{request: domainSend.PollVoteRequest{
+				BaseRequest: domainSend.BaseRequest{
+					Phone: "120363210094537452@g.us",
+				},
+				MessageID:   "",
+				PollSender:  "34600111222@s.whatsapp.net",
+				OptionNames: []string{"Si"},
+			}},
+			err: pkgError.ValidationError("message_id: cannot be blank."),
+		},
+		{
+			name: "should error with empty poll sender",
+			args: args{request: domainSend.PollVoteRequest{
+				BaseRequest: domainSend.BaseRequest{
+					Phone: "120363210094537452@g.us",
+				},
+				MessageID:   "3EB089B9D6ADD58153C561",
+				PollSender:  "",
+				OptionNames: []string{"Si"},
+			}},
+			err: pkgError.ValidationError("poll_sender: cannot be blank."),
+		},
+		{
+			name: "should error with empty options",
+			args: args{request: domainSend.PollVoteRequest{
+				BaseRequest: domainSend.BaseRequest{
+					Phone: "120363210094537452@g.us",
+				},
+				MessageID:   "3EB089B9D6ADD58153C561",
+				PollSender:  "34600111222@s.whatsapp.net",
+				OptionNames: []string{},
+			}},
+			err: pkgError.ValidationError("option_names: cannot be blank."),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := ValidateSendPollVote(context.Background(), tt.args.request)
+			assert.Equal(t, tt.err, err)
+		})
+	}
+}
+
 func TestValidateSendPresence(t *testing.T) {
 	type args struct {
 		request domainSend.PresenceRequest

@@ -751,6 +751,10 @@ func NewScheduledSendService(base domainSend.ISendUsecase, scheduler *ScheduleSe
 	return &scheduledSendService{base: base, scheduler: scheduler}
 }
 
+func (s *scheduledSendService) SendPollVote(ctx context.Context, req domainSend.PollVoteRequest) (domainSend.GenericResponse, error) {
+	return s.base.SendPollVote(ctx, req)
+}
+
 func (s *scheduledSendService) SendText(ctx context.Context, req domainSend.MessageRequest) (domainSend.GenericResponse, error) {
 	if !req.IsScheduled() {
 		return s.base.SendText(ctx, req)

@@ -517,6 +517,33 @@ func ValidateSendPoll(ctx context.Context, request domainSend.PollRequest) error
 	return nil
 }
 
+func ValidateSendPollVote(ctx context.Context, request domainSend.PollVoteRequest) error {
+	if len(request.OptionNames) == 0 {
+		return pkgError.ValidationError("option_names: cannot be blank.")
+	}
+
+	err := validation.ValidateStructWithContext(ctx, &request,
+		validation.Field(&request.Phone, validation.Required),
+		validation.Field(&request.MessageID, validation.Required),
+		validation.Field(&request.PollSender, validation.Required),
+		validation.Field(&request.OptionNames, validation.Each(validation.Required)),
+	)
+
+	if err != nil {
+		return pkgError.ValidationError(err.Error())
+	}
+
+	if err := validatePhoneNumber(request.Phone); err != nil {
+		return err
+	}
+
+	if err := validatePhoneNumber(request.PollSender); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func ValidateSendPresence(ctx context.Context, request domainSend.PresenceRequest) error {
 	err := validation.ValidateStructWithContext(ctx, &request,
 		validation.Field(&request.Type, validation.In("available", "unavailable")),

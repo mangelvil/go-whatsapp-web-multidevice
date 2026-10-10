@@ -1876,6 +1876,63 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorInternalServer'
+  /send/poll/vote:
+    post:
+      operationId: sendPollVote
+      tags:
+        - send
+      summary: Vote on a poll
+      parameters:
+        - $ref: '#/components/parameters/DeviceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                  description: The WhatsApp chat JID that contains the poll. Use '@g.us' for groups.
+                  example: '120363210094537452@g.us'
+                message_id:
+                  type: string
+                  description: The WhatsApp message ID of the original poll creation message.
+                  example: '3EB089B9D6ADD58153C561'
+                poll_sender:
+                  type: string
+                  description: The WhatsApp JID of the sender that created the poll.
+                  example: '6289685024421@s.whatsapp.net'
+                option_names:
+                  type: array
+                  description: The poll option names to vote for.
+                  items:
+                    type: string
+                  example: [ 'Aang' ]
+              required:
+                - phone
+                - message_id
+                - poll_sender
+                - option_names
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServer'
   /send/presence:
     post:
       operationId: sendPresence

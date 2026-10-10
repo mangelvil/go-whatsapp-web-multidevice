@@ -1588,6 +1588,52 @@ func (service serviceSend) persistSentPollDefinition(ctx context.Context, recipi
 	return service.chatStorageRepo.UpsertPollDefinition(definition)
 }
 
+func (service serviceSend) SendPollVote(ctx context.Context, request domainSend.PollVoteRequest) (response domainSend.GenericResponse, err error) {
+	err = validations.ValidateSendPollVote(ctx, request)
+	if err != nil {
+		return response, err
+	}
+
+	client := whatsapp.ClientFromContext(ctx)
+	if client == nil {
+		return response, pkgError.ErrWaCLI
+	}
+
+	dataWaRecipient, err := utils.ValidateJidWithLogin(client, request.BaseRequest.Phone)
+	if err != nil {
+		return response, err
+	}
+
+	pollSender, err := utils.ValidateJidWithLogin(client, request.PollSender)
+	if err != nil {
+		return response, err
+	}
+
+	pollInfo := types.MessageInfo{
+		MessageSource: types.MessageSource{
+			Chat:    dataWaRecipient,
+			Sender:  pollSender,
+			IsGroup: dataWaRecipient.Server == types.GroupServer,
+		},
+		ID: types.MessageID(request.MessageID),
+	}
+
+	msg, err := client.BuildPollVote(ctx, &pollInfo, request.OptionNames)
+	if err != nil {
+		return response, err
+	}
+
+	content := fmt.Sprintf("Poll vote: %s", strings.Join(request.OptionNames, ", "))
+	ts, err := service.wrapSendMessage(ctx, client, dataWaRecipient, msg, content)
+	if err != nil {
+		return response, err
+	}
+
+	response.MessageID = ts.ID
+	response.Status = fmt.Sprintf("Send poll vote success %s (server timestamp: %s)", request.BaseRequest.Phone, ts.Timestamp.String())
+	return response, nil
+}
+
 func (service serviceSend) SendPresence(ctx context.Context, request domainSend.PresenceRequest) (response domainSend.GenericResponse, err error) {
 	err = validations.ValidateSendPresence(ctx, request)
 	if err != nil {
